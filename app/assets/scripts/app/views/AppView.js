@@ -88,7 +88,7 @@
     
   });
   
-  var FormBuilder = new app.FormBuilderView();
+  var AppInstance = new app.FormAppView();
   
   var instance = new app.AppModel();
   
