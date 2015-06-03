@@ -1,0 +1,8 @@
+node_modules
+dist
+app/assets/bower_components
+public
+*.log
+.tmp
+.publish
+app/assets/styles/main.css
