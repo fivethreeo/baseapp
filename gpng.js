@@ -3,7 +3,6 @@ var path           = require('path');
     gutil          = require('gulp-util'),
     assign         = require('object-assign'),
     File           = require('vinyl'),
-    css2XPath      = require('css-to-xpath'),
     phantom        = require('phantom'); 
 
 var PluginError    = gutil.PluginError;
@@ -18,47 +17,47 @@ var get_bounding_boxes = function(path, cb) {
         
         page.evaluate(function () {
           
-            var svg = document.querySelectorAll('svg')[0];
+          var svg = document.querySelectorAll('svg')[0];
           
-            svg.setAttribute('viewBox', "0 0 1700 1500");
-            svg.setAttribute('width', "100%");
-            svg.setAttribute('height', "100%");
+          svg.setAttribute('viewBox', "0 0 1700 1500");
+          svg.setAttribute('width', "100%");
+          svg.setAttribute('height', "100%");
             
-            var font = document.querySelectorAll('font')[0];
+          var font = document.querySelectorAll('font')[0];
             
-            var glyphs = document.querySelectorAll('glyph');
-            for (var i = 0; i < glyphs.length; i++) {
-              var el = document.createElementNS("http://www.w3.org/2000/svg","path");
-              el.setAttribute("d", glyphs[i].getAttribute("d"));
-              svg.appendChild(el);
-              font.removeChild(glyphs[i]);
-            }
+          var glyphs = document.querySelectorAll('glyph');
+          for (var i = 0; i < glyphs.length; i++) {
+            var el = document.createElementNS("http://www.w3.org/2000/svg","path");
+            el.setAttribute("d", glyphs[i].getAttribute("d"));
+            svg.appendChild(el);
+            font.removeChild(glyphs[i]);
+          }
             
-            var paths = document.querySelectorAll('path');
-            var boxes = [];
+          var paths = document.querySelectorAll('path');
+          var boxes = [];
             
-            for (var i = paths.length-1; i > 0 ; i--) {
-                var bbox = paths[i].getBBox(),
-                    bboxObj = {x: bbox.x, y: bbox.y,
-                               width: bbox.width, height: bbox.height};
-                boxes.push(bboxObj)
-              }
-            return boxes;
+          for (var i = paths.length-1; i > 0 ; i--) {
+            var bbox = paths[i].getBBox(),
+            bboxObj = {x: bbox.x, y: bbox.y,
+            width: bbox.width, height: bbox.height};
+            boxes.push(bboxObj)
+          }
+          
+          return boxes;
             
           }, function (result) {
             
             ph.exit();
             cb(result)
             
+          });
         });
       });
-    });
-  }, {
-  dnodeOpts: {
-    weak: false
-  }
-});
-
+    }, {
+    dnodeOpts: {
+      weak: false
+    }
+  });
 }
 
 
