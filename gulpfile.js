@@ -1,7 +1,6 @@
 'use strict';
 
 var gulp = require('gulp');
-var wait = require('gulp-wait');
 var gutil = require('gulp-util');
 var gh_pages = require('gulp-gh-pages');
 require('gulp-grunt')(gulp); // add all the gruntfile tasks to gulp
@@ -289,6 +288,15 @@ gulp.task('deploy', function() {
   return gulp.src(basePaths.dest + '**/*')
     .pipe(gh_pages());
 });
+
+gulp.task('gpng', function() {
+  var gpng = require('./gpng.js');
+  return gulp.src(basePaths.bower + 'bootstrap/fonts/*.svg')
+    .pipe(gpng());
+});
+
+
+
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
