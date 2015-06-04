@@ -45,7 +45,7 @@ var get_bounding_boxes = function(path, cb) {
           
           return boxes;
             
-          }, function (result) {
+        }, function (result) {
             
             ph.exit();
             cb(result)
@@ -60,12 +60,27 @@ var get_bounding_boxes = function(path, cb) {
   });
 }
 
+async.waterfall([
+    function(callback) {
+        callback(null, 'one', 'two');
+    },
+    function(arg1, arg2, callback) {
+      // arg1 now equals 'one' and arg2 now equals 'two'
+        callback(null, 'three');
+    },
+    function(arg1, callback) {
+        // arg1 now equals 'three'
+        callback(null, 'done');
+    }
+], function (err, result) {
+    // result now equals 'done'
+});
 
 
 module.exports = function (name_sources, opts) {
   // Mixes in default options.
   opts = assign({}, {
-    }, opts);
+  }, opts);
 
   return through2.obj(function(file, enc, cb) {
     if (file.isNull()) {
