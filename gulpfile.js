@@ -291,7 +291,7 @@ gulp.task('deploy', function() {
 
 gulp.task('gpng', function() {
   var gpng = require('./gpng.js');
-  return gulp.src(basePaths.bower + 'bootstrap/fonts/*.svg')
+  return gulp.src(basePaths.bower + 'bootstrap/dist/fonts/*.svg')
     .pipe(gpng())
     .pipe(gulp.dest(paths.images.tmp));
 });

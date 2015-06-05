@@ -3,9 +3,11 @@ var path = require('path');
   gutil = require('gulp-util'),
   assign = require('object-assign'),
   File = require('vinyl'),
+  vinylFile = require('vinyl-file'),
   phantom = require('phantom'),
   async = require('async'),
-
+  css = require('css'),
+  
   PluginError = gutil.PluginError;
 
 var svg = function (vars) { return '<?xml version="1.0" standalone="no"?>\
@@ -81,6 +83,27 @@ module.exports = function(name_source, opts) {
             function(bounding_boxes) {
 
               phantom_instance.exit();
+              
+              var base = path.join(file.path, '..');
+              var cssFile = vinylFile.readSync(path.join(file.path, '../../css/bootstrap.css'));
+              var parsedCss = css.parse(cssFile.contents.toString('utf8'));
+              var rules = parsedCss.stylesheet.rules;
+              
+              var unicodemap = {};
+              
+              for (var i = 0; i < rules.length; i++) {  
+                var rule = rules[i];
+                if (/^\.glyphicon/.test(rule.selectors)) {
+                  for (var j = 0; j < rule.declarations.length; j++) {
+                    if (rule.declarations[j].property=="content") {
+                      var name = rule.selectors.toString().split(/[\.\:]/g)[1];
+                      var unicode = rule.declarations[j].value.toString().replace(/[\\\"]/g, '')
+                      unicodemap[unicode] = name;
+                    }
+                  }
+                }
+              }
+
               var re = /<glyph unicode="(.*?)".[^>]*>/mg
               var re2 = /<glyph unicode=".*?"/
     
@@ -89,14 +112,14 @@ module.exports = function(name_source, opts) {
               var index = 2;
               while (match = re.exec(file.contents.toString('utf8'))) {
                 
-                var name = match[match_group].replace(/[&;\#\*\s\+]/g, '_') + '.svg';
+                var unicodeid = match[match_group].replace(/&\#x|;|\*|\+/g, '')
+                var name= unicodemap[unicodeid] + '.svg';
                 var bbox = bounding_boxes[index];
                 var ctxt = assign(bbox, {
                   path: match[0].replace(re2, '<path'),
                   transform: 'translate(' + (-parseInt(bbox.x)) + ',' + (-parseInt(bbox.y)) + ')'
                 });
                 
-                var base = path.join(file.path, '..');
                 var newfile = new File({
                   base: base,
                   path: path.join(base, name),

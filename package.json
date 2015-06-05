@@ -5,6 +5,7 @@
     "async": "^1.2.0",
     "connect": "^3.3.5",
     "connect-livereload": "^0.5.3",
+    "css": "^2.2.0",
     "grunt": "^0.4.5",
     "gulp": "^3.8.5",
     "gulp-autoprefixer": "^2.3.0",
@@ -28,6 +29,7 @@
     "serve-static": "^1.9.3",
     "through2": "^0.6.5",
     "vinyl": "^0.4.6",
+    "vinyl-file": "^1.1.1",
     "wiredep": "^2.2.2"
   },
   "engines": {
