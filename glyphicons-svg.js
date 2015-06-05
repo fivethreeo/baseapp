@@ -11,7 +11,7 @@ var path = require('path');
   
   PluginError = gutil.PluginError;
 
-var svg = function (vars) { return '<?xml version="1.0" standalone="no"?>\
+var svg = function (vars) { return '<?xml version="1.0" standalone="no"?>\n\
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >\n\
 <svg xmlns="http://www.w3.org/2000/svg" height="' + vars.height + '" width="' + vars.width + '">\n\
 <metadata></metadata>\n\

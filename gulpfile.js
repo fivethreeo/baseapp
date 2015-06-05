@@ -169,7 +169,7 @@ gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
     }
 
     var wiredep_options= {
-      exclude:  [ /bootstrap.*\.css$|modernizr/ ], // use less/ move modernizr to top manually
+      exclude:  [ /bootstrap.*\.css$|modernizr/ ], // use less/ move modernizr to top using sources_top inject
       directory: basePaths.bower,
       overrides: {
         'jquery-timing': {main:'jquery-timing.js'}
@@ -258,7 +258,7 @@ gulp.task('serve', ['connect'], function () {
 
     var delay_livereload = function(timeout) {
       return function(vinyl) {
-        setTimeout(function() { livereload.changed(vinyl)}, timeout)
+        setTimeout(function() { livereload.changed(vinyl) }, timeout)
       };
     }
 
