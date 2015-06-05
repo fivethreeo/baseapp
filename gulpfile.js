@@ -129,11 +129,11 @@ gulp.task('less', function () {
 });
 
 gulp.task('ejsc', function () {
-    var ejsc = require('./ejs_inject.js');
+    var ejsccompile = require('./ejsc-compile.js');
     var ejscfiles = gulp.src(paths.scripts.src + '**/*.ejsc')
  
     return ejscfiles
-        .pipe(ejsc())
+        .pipe(ejsccompile())
         .pipe(gulp.dest(paths.scripts.tmp));
 });
 
@@ -289,15 +289,12 @@ gulp.task('deploy', function() {
     .pipe(gh_pages());
 });
 
-gulp.task('gpng', function() {
-  var gpng = require('./gpng.js');
+gulp.task('svg', function() {
+  var glyphiconssvg = require('./glyphicons-svg.js');
   return gulp.src(basePaths.bower + 'bootstrap/dist/fonts/*.svg')
-    .pipe(gpng())
+    .pipe(glyphiconssvg())
     .pipe(gulp.dest(paths.images.tmp));
 });
-
-
-
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
