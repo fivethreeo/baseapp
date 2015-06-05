@@ -113,12 +113,12 @@ module.exports = function(name_source, opts) {
               var index = 2;
               while (match = re.exec(file.contents.toString('utf8'))) {
                 
-                var unicodeid = match[match_group].replace(/&\#x|;|\*|\+/g, '')
+                var unicodeid = match[match_group].replace(/&\#x|;/g, '').replace(/\*/, '2a').replace(/\+/, '2b')
                 var name= unicodemap[unicodeid] + '.svg';
                 var bbox = bounding_boxes[index];
                 var ctxt = assign(bbox, {
                   path: match[0].replace(re2, '<path'),
-                  transform: 'translate(' + (-parseInt(bbox.x)) + ',' + (-parseInt(bbox.y)) + ')'
+                  transform: 'translate(' + (-parseInt(bbox.x)) + ',' + (parseInt(bbox.height)+parseInt(bbox.y)) + ') scale(1,-1)'
                 });
                 
                 var newfile = new File({
