@@ -121,16 +121,3 @@ module.exports = function(name_source, opts) {
     });
   });
 }
-
-  /*
-    
-    var base = path.join(file.path, '..');
-  var that = this
-    var first = new File({
-      base: base,
-      path: path.join(base, 'first.txt'),
-      contents: new Buffer('First file: ' + mydata.something)
-    });
-
-    this.push(first);
-  */
