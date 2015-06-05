@@ -35,7 +35,7 @@ module.exports = function(name_source, opts) {
     }
 
     if (file.isStream()) {
-      return through_callback(new PluginError('gpng', 'Streaming not supported for source svg'));
+      return through_callback(new PluginError('glyphicons-svg', 'Streaming not supported for source svg'));
     }
     
 
@@ -54,8 +54,11 @@ module.exports = function(name_source, opts) {
               svg.setAttribute('height', "100%");
 
               var font = document.querySelectorAll('font')[0];
-
+              
+              // get all glyphs
               var glyphs = document.querySelectorAll('glyph');
+              
+              // make glyphs paths/ add paths / remove glyphs form dom
               for (var i = 0; i < glyphs.length; i++) {
                 var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 el.setAttribute("d", glyphs[i].getAttribute("d"));
@@ -65,7 +68,8 @@ module.exports = function(name_source, opts) {
 
               var paths = document.querySelectorAll('path');
               var boxes = [];
-
+              
+              // loop over paths that now have bounding boxes / order matters a LOT
               for (var i = 0; i < paths.length; i++) {
                 var bbox = paths[i].getBBox(),
                   bboxObj = {
@@ -75,8 +79,8 @@ module.exports = function(name_source, opts) {
                     height: bbox.height
                   };
                 boxes.push(bboxObj)
-              }
-
+            }
+              // return bounding to node boxes
               return boxes;
 
             },
@@ -92,6 +96,7 @@ module.exports = function(name_source, opts) {
               
               var unicodemap = {};
               
+              // make unicode / css class maps for naming the files pretty
               for (var i = 0; i < rules.length; i++) {  
                 var rule = rules[i];
                 if (/^\.glyphicon/.test(rule.selectors)) {
@@ -104,6 +109,10 @@ module.exports = function(name_source, opts) {
                   }
                 }
               }
+              
+              // webkit would not give me the attribute without converting it to actual unicode first
+              // grab it with regexps
+              // also would not give me the paths as code lets grab those aswell 
 
               var re = /<glyph unicode="(.*?)".[^>]*>/mg
               var re2 = /<glyph unicode=".*?"/
@@ -113,11 +122,15 @@ module.exports = function(name_source, opts) {
               var index = 2;
               while (match = re.exec(file.contents.toString('utf8'))) {
                 
+                // get the unicode it to get the mapped name / treat * and + spechial case
                 var unicodeid = match[match_group].replace(/&\#x|;/g, '').replace(/\*/, '2a').replace(/\+/, '2b')
-                var name= unicodemap[unicodeid] + '.svg';
+                var name = unicodemap[unicodeid] + '.svg';
                 var bbox = bounding_boxes[index];
+                
+                // make svg context
                 var ctxt = assign(bbox, {
                   path: match[0].replace(re2, '<path'),
+                  // translate and scale to get the right side up since glyps are always upside down
                   transform: 'translate(' + (-parseInt(bbox.x)) + ',' + (parseInt(bbox.height)+parseInt(bbox.y)) + ') scale(1,-1)'
                 });
                 
@@ -126,13 +139,13 @@ module.exports = function(name_source, opts) {
                   path: path.join(base, name),
                   contents: new Buffer(svg(ctxt))
                 });
-            
+                
+                // add files to queue
                 that.push(newfile);
               
                 index++;
               }
-    
-
+              
               through_callback();
             });
 
