@@ -5,6 +5,7 @@ var path = require('path');
   File = require('vinyl'),
   vinylFile = require('vinyl-file'),
   phantom = require('phantom'),
+  phantomjs = require('phantomjs'),
   async = require('async'),
   css = require('css'),
   
@@ -138,9 +139,11 @@ module.exports = function(name_source, opts) {
         });
       });
     }, {
+      binary: phantomjs.path,
       dnodeOpts: {
-        weak: false
+        weak: false,
       }
     });
+
   });
 }

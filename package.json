@@ -24,6 +24,8 @@
     "gulp-util": "^3.0.4",
     "object-assign": "^2.0.0",
     "opn": "^1.0.2",
+    "phantom": "^0.7.2",
+    "phantomjs": "^1.9.17",
     "rimraf": "^2.2.8",
     "serve-index": "^1.6.4",
     "serve-static": "^1.9.3",
