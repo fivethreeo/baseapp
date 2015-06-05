@@ -86,14 +86,14 @@ module.exports = function(name_source, opts) {
     
               var match;
               var match_group = 1;
-              var index = 0;
+              var index = 2;
               while (match = re.exec(file.contents.toString('utf8'))) {
                 
                 var name = match[match_group].replace(/[&;\#\*\s\+]/g, '_') + '.svg';
                 var bbox = bounding_boxes[index];
                 var ctxt = assign(bbox, {
                   path: match[0].replace(re2, '<path'),
-                  transform: 'translate(-' + bbox.x + ',-' + bbox.y + ')'
+                  transform: 'translate(' + (-parseInt(bbox.x)) + ',' + (-parseInt(bbox.y)) + ')'
                 });
                 
                 var base = path.join(file.path, '..');
