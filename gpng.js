@@ -1,129 +1,136 @@
-var path           = require('path');
-    through2       = require('through2'),
-    gutil          = require('gulp-util'),
-    assign         = require('object-assign'),
-    File           = require('vinyl'),
-    phantom        = require('phantom'); 
+var path = require('path');
+  through2 = require('through2'),
+  gutil = require('gulp-util'),
+  assign = require('object-assign'),
+  File = require('vinyl'),
+  phantom = require('phantom'),
+  async = require('async'),
 
-var PluginError    = gutil.PluginError;
+  PluginError = gutil.PluginError;
 
-var get_bounding_boxes = function(path, cb) {
+var svg = function (vars) { return '<?xml version="1.0" standalone="no"?>\
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >\n\
+<svg xmlns="http://www.w3.org/2000/svg" height="' + vars.height + '" width="' + vars.width + '">\n\
+<metadata></metadata>\n\
+<defs></defs>\n\
+<g transform="' + vars.transform + '">\n\
+' + vars.path + '\n\
+</g>\n\
+</svg>\
+'
+}
 
-  phantom.create(function (ph) {
-    ph.createPage(function (page) {
-      var uri = 'file:///' + path.replace(/\\/g, '/').replace(/\:\//g, '://');
-  
-      page.open(uri, function (status) {
-        
-        page.evaluate(function () {
-          
-          var svg = document.querySelectorAll('svg')[0];
-          
-          svg.setAttribute('viewBox', "0 0 1700 1500");
-          svg.setAttribute('width', "100%");
-          svg.setAttribute('height', "100%");
+module.exports = function(name_source, opts) {
+  // Mixes in default options.
+  opts = assign({}, opts);
+
+  return through2.obj(function(file, enc, through_callback) {
+    var that = this;
+
+    if (file.isNull()) {
+      return through_callback(null, file);
+    }
+
+    if (file.isStream()) {
+      return through_callback(new PluginError('gpng', 'Streaming not supported for source svg'));
+    }
+    
+
+    phantom.create(function(phantom_instance) {
+      phantom_instance.createPage(function(page) {
+
+        var uri = 'file:///' + file.path.replace(/\\/g, '/').replace(/\:\//g, '://');
+        page.open(uri, function(status) {
+
+          page.evaluate(function() {
+
+              var svg = document.querySelectorAll('svg')[0];
+
+              svg.setAttribute('viewBox', "0 0 1700 1500");
+              svg.setAttribute('width', "100%");
+              svg.setAttribute('height', "100%");
+
+              var font = document.querySelectorAll('font')[0];
+
+              var glyphs = document.querySelectorAll('glyph');
+              for (var i = 0; i < glyphs.length; i++) {
+                var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                el.setAttribute("d", glyphs[i].getAttribute("d"));
+                svg.appendChild(el);
+                font.removeChild(glyphs[i]);
+              }
+
+              var paths = document.querySelectorAll('path');
+              var boxes = [];
+
+              for (var i = paths.length - 1; i > 0; i--) {
+                var bbox = paths[i].getBBox(),
+                  bboxObj = {
+                    x: bbox.x,
+                    y: bbox.y,
+                    width: bbox.width,
+                    height: bbox.height
+                  };
+                boxes.push(bboxObj)
+              }
+
+              return boxes;
+
+            },
+
+            function(bounding_boxes) {
+
+              phantom_instance.exit();
+              var re = /<glyph unicode="(.*?)".[^>]*>/mg
+              var re2 = /<glyph unicode=".*?"/
+    
+              var match;
+              var match_group = 1;
+              var index = 0;
+              while (match = re.exec(file.contents.toString('utf8'))) {
+                
+                var name = match[match_group].replace(/[&;\#\*\s\+]/, '_') + '.svg';
+                var bbox = bounding_boxes[index];
+                var ctxt = assign(bbox, {
+                  path: match[0].replace(re2, '<path'),
+                  transform: 'translate(-' + bbox.x + ',-' + bbox.y + ')'
+                });
+                
+                var base = path.join(file.path, '..');
+                var newfile = new File({
+                  base: base,
+                  path: path.join(base, name),
+                  contents: new Buffer(svg(ctxt))
+                });
             
-          var font = document.querySelectorAll('font')[0];
-            
-          var glyphs = document.querySelectorAll('glyph');
-          for (var i = 0; i < glyphs.length; i++) {
-            var el = document.createElementNS("http://www.w3.org/2000/svg","path");
-            el.setAttribute("d", glyphs[i].getAttribute("d"));
-            svg.appendChild(el);
-            font.removeChild(glyphs[i]);
-          }
-            
-          var paths = document.querySelectorAll('path');
-          var boxes = [];
-            
-          for (var i = paths.length-1; i > 0 ; i--) {
-            var bbox = paths[i].getBBox(),
-            bboxObj = {x: bbox.x, y: bbox.y,
-            width: bbox.width, height: bbox.height};
-            boxes.push(bboxObj)
-          }
-          
-          return boxes;
-            
-        }, function (result) {
-            
-            ph.exit();
-            cb(result)
-            
-          });
+                that.push(newfile);
+              
+                index++;
+              }
+    
+
+              through_callback();
+            });
+
         });
       });
     }, {
-    dnodeOpts: {
-      weak: false
-    }
+      dnodeOpts: {
+        weak: false
+      }
+    });
   });
 }
 
-async.waterfall([
-    function(callback) {
-        callback(null, 'one', 'two');
-    },
-    function(arg1, arg2, callback) {
-      // arg1 now equals 'one' and arg2 now equals 'two'
-        callback(null, 'three');
-    },
-    function(arg1, callback) {
-        // arg1 now equals 'three'
-        callback(null, 'done');
-    }
-], function (err, result) {
-    // result now equals 'done'
-});
-
-
-module.exports = function (name_sources, opts) {
-  // Mixes in default options.
-  opts = assign({}, {
-  }, opts);
-
-  return through2.obj(function(file, enc, cb) {
-    if (file.isNull()) {
-      return cb(null, file);
-    }
-   
-    if (file.isStream()) {
-      return cb(new PluginError('gpng', 'Streaming not supported for source svg'));
-    }
+  /*
     
-    var re = /unicode="(.*?)"/mg
-      
-    var matches = [];
-    var match;
-    var index = 1; 
-    while (match = re.exec(file.contents.toString('utf8'))) {
-      matches.push(match[index]);
-    }
-        
-    console.log(JSON.stringify(matches));
-    
-    get_bounding_boxes(file.path, function(bounding_result) {
-        
-      console.log(JSON.stringify(bounding_result));
-        
-      cb();        
-      
+    var base = path.join(file.path, '..');
+  var that = this
+    var first = new File({
+      base: base,
+      path: path.join(base, 'first.txt'),
+      contents: new Buffer('First file: ' + mydata.something)
     });
-    
-  });
-  
-};
 
-
-    /*
-		
-		var base = path.join(file.path, '..');
-    var that = this
-		var first = new File({
-			base: base,
-			path: path.join(base, 'first.txt'),
-			contents: new Buffer('First file: ' + mydata.something)
-		});
-
-		this.push(first);
-    */
+    this.push(first);
+  */

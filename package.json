@@ -2,6 +2,7 @@
   "name": "app",
   "version": "0.0.1",
   "dependencies": {
+    "async": "^1.2.0",
     "connect": "^3.3.5",
     "connect-livereload": "^0.5.3",
     "grunt": "^0.4.5",
