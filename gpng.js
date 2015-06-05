@@ -63,7 +63,7 @@ module.exports = function(name_source, opts) {
               var paths = document.querySelectorAll('path');
               var boxes = [];
 
-              for (var i = paths.length - 1; i > 0; i--) {
+              for (var i = 0; i < paths.length; i++) {
                 var bbox = paths[i].getBBox(),
                   bboxObj = {
                     x: bbox.x,
@@ -89,7 +89,7 @@ module.exports = function(name_source, opts) {
               var index = 0;
               while (match = re.exec(file.contents.toString('utf8'))) {
                 
-                var name = match[match_group].replace(/[&;\#\*\s\+]/, '_') + '.svg';
+                var name = match[match_group].replace(/[&;\#\*\s\+]/g, '_') + '.svg';
                 var bbox = bounding_boxes[index];
                 var ctxt = assign(bbox, {
                   path: match[0].replace(re2, '<path'),
