@@ -54,7 +54,7 @@
   });
 
   
-  app.appcollection = new app.AppCollection();
+  // app.appcollection = new app.AppCollection();
   
   app.AppView = Backbone.View.extend({
     
@@ -81,20 +81,15 @@
       return this;
     },
     
-    activateTab : function(event){
-      this.childel.removeClass('form-horizontal form-vertical form-inline');
-      this.childel.addClass($(event.currentTarget).tab('show').data('class'));
-    }
-    
   });
   
   var AppInstance = new app.AppView();
   
-  var instance = new app.AppModel();
+  // var instance = new app.AppModel();
   
-  var instance2 = instance.deepclone().set_recursive({});
-  
-  app.appcollection.add(instance);  
-  app.appcollection.add(instance2); 
+  // var instance2 = instance.deepclone().set_recursive({});
+   
+  // app.appcollection.add(instance);  
+  // app.appcollection.add(instance2); 
   
 })(jQuery);
