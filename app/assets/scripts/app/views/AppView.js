@@ -9,16 +9,6 @@
   }
     
   app.BaseModel = Backbone.Model.extend({
-
-    set_recursive: function(dict) {
-      var that = this;
-      _.mapObject(dict, function(value, key) {
-          if (that.attributes[key] && that.attributes[key].set_recursive) { that.attributes[key].set_recursive(value); }
-          else { that.set(key, value); }
-      })
-      return that;
-      
-    },
     
     deepclone: function() {
       var that = this;
@@ -33,6 +23,19 @@
     
   });
     
+  app.BaseRecursiveModel = app.BaseModel.extend({
+
+    set_recursive: function(dict) {
+      var that = this;
+      _.mapObject(dict, function(value, key) {
+          if (that.attributes[key] && that.attributes[key].set_recursive) { that.attributes[key].set_recursive(value); }
+          else { that.set(key, value); }
+      })
+      return that;
+      
+    }
+  });
+        
   app.BaseModel.prototype.sync = function() { return null; };
   app.BaseModel.prototype.fetch = function() { return null; };
   app.BaseModel.prototype.save = function() { return null; }  
@@ -47,15 +50,60 @@
 
 		// Todos are sorted by their original insertion order.
 		comparator: 'order',
-    
+        
     deepclone: function() {
       return new this.constructor(_.map(this.models, function(m) { return m.deepclone ? m.deepclone() : m.clone(); }));  
     }
   });
+  
+  app.BaseRecursiveCollection = app.BaseCollection.extend({
+    
+    set_recursive: function(list) {
+      var that = this;
+      _.map(_.range(list.length), function(index) {
+          if (that.models.length > index) {
+            if (that.models[index].set_recursive) that.models[index].set_recursive(list[index]);
+          }
+          else {
+            var obj = that.create({});
+            if (obj.set_recursive) obj.set_recursive(list[index]);
+          }
+      })
+      return that;
+      
+    }
+  });
+    
+  app.AppModel = app.BaseRecursiveModel.extend({
+    
+    defaults: _.extend({}, app.BaseRecursiveModel.prototype.defaults, {
+      enabled: false
+    })
+  });   
+  
+  app.AppCollection = app.BaseRecursiveCollection.extend({
+    model: app.AppModel
+  });
+  
+  app.appcollection = new app.AppCollection();
+  
+  app.ChildView = Backbone.View.extend({
+    
+    template : _.template(templates.app_child_template||''),
+    
+    events : {
+    },
+    
+    initialize : function(){
+    },
+    
+    render : function(){
 
-  
-  // app.appcollection = new app.AppCollection();
-  
+      this.el = this.template({model: this.model});
+      return this;
+    }
+    
+  });        
   app.AppView = Backbone.View.extend({
     
     el : '.backbone',
@@ -85,11 +133,11 @@
   
   var AppInstance = new app.AppView();
   
-  // var instance = new app.AppModel();
+  var instance = new app.AppModel();
   
-  // var instance2 = instance.deepclone().set_recursive({});
+  var instance2 = instance.deepclone().set_recursive({});
    
-  // app.appcollection.add(instance);  
-  // app.appcollection.add(instance2); 
+  app.appcollection.add(instance);  
+  app.appcollection.add(instance2); 
   
 })(jQuery);
