@@ -11,7 +11,7 @@ echo "6: bower install"
 echo "7: git checkout-index -a --prefix=../dir/ (export)"
 echo
 
-echo "Choose command number:"
+echo -n "Choose command number:"
 
 read command
 
@@ -29,17 +29,17 @@ case "$command" in
     gulp serve
     ;;
   "5")
-    echo "Arguments:"
+    echo -n "Arguments:"
     read commandarguments
     npm install $commandarguments
     ;;
   "6")
-    echo "Arguments:"
+    echo -n "Arguments:"
     read commandarguments
     bower install $commandarguments
     ;;
   "7")
-    echo "Export to directory (end with backslash):"
+    echo -n "Export to directory (end with backslash):"
     read directory
     if [ ! -d "$directory" ]; then
       md $directory
