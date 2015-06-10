@@ -8,7 +8,9 @@ echo "3: gulp build"
 echo "4: gulp serve"
 echo "5: npm install"
 echo "6: bower install"
-echo "7: git checkout-index -a --prefix=../dir/ (export)"
+echo "7: virtualenv"
+echo "8: pip install"
+echo "9: git checkout-index -a --prefix=../dir/ (export)"
 echo
 
 echo -n "Choose command number:"
@@ -39,6 +41,41 @@ case "$command" in
     bower install $commandarguments
     ;;
   "7")
+    echo -n "Environment name (default: env):"
+    read envname
+    if [ -z "$envname" ]; then
+      envname="env"
+    fi
+    echo -n "Use site packages (y/n default: y):"
+    read sitepackages
+    if [ "$sitepackages" != "n" ]; then
+      sitepackagesargs=--system-site-packages
+    fi
+    echo -n "Arguments:"
+    read commandarguments
+    echo virtualenv $envname $sitepackagesargs $commandarguments
+    ;;
+  "8")
+    echo -n "Environment name (default: env):"
+    read envname
+    if [ -z "$envname" ]; then
+      envname="env"
+    fi
+    echo -n "Use requirements (y/n default: y):"
+    read userequirements
+    if [ "$userequirements" != "n" ]; then
+      echo -n "Requirements file (default: requirements.txt):"
+      read requirements
+      if [ -z "$requirements" ]; then
+        requirements="requirements.txt"
+      fi
+      requirementssargs="-r $requirements"
+    fi
+    echo -n "Arguments:"
+    read commandarguments
+    echo $envname/bin/pip install $requirementssargs $commandarguments
+    ;;
+  "9")
     echo -n "Export to directory (end with backslash):"
     read directory
     if [ ! -d "$directory" ]; then

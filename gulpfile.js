@@ -1,6 +1,9 @@
 'use strict';
 
-var gulp = require('gulp');
+var gulp = require('gulp'),
+  gulpif = require('gulp-if'),
+  gulpreplace = require('gulp-replace');
+        
 var gutil = require('gulp-util');
 var gh_pages = require('gulp-gh-pages');
 require('gulp-grunt')(gulp); // add all the gruntfile tasks to gulp
@@ -20,6 +23,12 @@ if(gutil.env.lint === true) {
 	lint = true;
 }
 
+var djangify = gulpreplace(/((src|href)=")assets\//g, '$1{{ STATIC_URL }}');
+
+var djangify_dev = gulpif(!isProduction, djangify, gutil.noop()),
+  djangify_prod = gulpif(isProduction, djangify, gutil.noop());
+  
+  
 var basePaths = {
 	src: 'app/',
 	dest: 'public/',
@@ -181,6 +190,7 @@ gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
         .pipe(wiredep(wiredep_options))
         .pipe(inject(sources_top, sources_top_options))
         .pipe(inject(sources, sources_options))
+        .pipe(djangify_dev)
         .pipe(gulp.dest(basePaths.tmp));
 });
 
@@ -189,8 +199,7 @@ gulp.task('dohtml', function () {
     
     if (!isProduction) return;
     
-    var gulpif = require('gulp-if'),
-        uglify = require('gulp-uglify'),
+    var uglify = require('gulp-uglify'),
         minify = require('gulp-minify-css'),
         
         useref = require('gulp-useref'),
@@ -205,6 +214,7 @@ gulp.task('dohtml', function () {
         .pipe(minifyIfCss)
         .pipe(assets.restore())
         .pipe(useref())
+        .pipe(djangify_prod)
         .pipe(gulp.dest(basePaths.dest));
 });
 

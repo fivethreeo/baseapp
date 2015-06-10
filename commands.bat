@@ -9,7 +9,9 @@ echo 3: gulp build
 echo 4: gulp serve
 echo 5: npm install
 echo 6: bower install
-echo 7: git checkout-index -a --prefix=..\dir\ (export)
+echo 7: virtualenv
+echo 8: pip install
+echo 9: git checkout-index -a --prefix=..\dir\ (export)
 echo.
 
 set /p command="Choose command number:"
@@ -35,6 +37,34 @@ if /I "%command%" EQU "6" (
   bower install !args!
 )
 if /I "%command%" EQU "7" (
+  set /p envname="Environment name (default: env):"
+  if /I "!envname!" EQU "" (
+    set envname=env
+  )
+  set /p sitepackages="Use site packages (y/n default: y):"
+  if /I "!sitepackages!" NEQ "n" (
+    set sitepackagesargs=--system-site-packages
+  )
+  set /p args="Arguments:"
+  virtualenv !envname! !sitepackagesargs! !args!
+)
+if /I "%command%" EQU "8" (
+  set /p envname="Environment name (default: env):"
+  if /I "!envname!" EQU "" (
+    set envname=env
+  )
+  set /p userequirements="Use requirements (y/n default: y):"
+  if /I "!userequirements!" NEQ "n" (
+    set /p requirements="Requirements file (default: requirements.txt):"
+    if /I "!requirements!" EQU "" (
+      set requirements=requirements.txt
+    )
+    set requirementssargs=-r !requirements!
+  )
+  set /p args="Arguments:"
+  !envname!\Scripts\pip.exe install !requirementssargs! !args!
+)
+if /I "%command%" EQU "9" (
 set /p directory="Export to directory (end with slash):"
 if not exist "!directory!\." (
   mkdir !directory!
