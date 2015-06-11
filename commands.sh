@@ -10,7 +10,8 @@ echo "5: npm install"
 echo "6: bower install"
 echo "7: virtualenv"
 echo "8: pip install"
-echo "9: git checkout-index -a --prefix=../dir/ (export)"
+echo "9: manage.py"
+echo "10: git checkout-index -a --prefix=../dir/ (export)"
 echo
 
 echo -n "Choose command number:"
@@ -53,7 +54,7 @@ case "$command" in
     fi
     echo -n "Arguments:"
     read commandarguments
-    echo virtualenv $envname $sitepackagesargs $commandarguments
+    virtualenv $envname $sitepackagesargs $commandarguments
     ;;
   "8")
     echo -n "Environment name (default: env):"
@@ -73,9 +74,19 @@ case "$command" in
     fi
     echo -n "Arguments:"
     read commandarguments
-    echo $envname/bin/pip install $requirementssargs $commandarguments
+    $envname/bin/pip install $requirementssargs $commandarguments
     ;;
   "9")
+    echo -n "Environment name (default: env):"
+    read envname
+    if [ -z "$envname" ]; then
+      envname="env"
+    fi
+    echo -n "Arguments:"
+    read commandarguments
+    $envname/bin/python django/manage.py $commandarguments
+    ;;
+  "10")
     echo -n "Export to directory (end with backslash):"
     read directory
     if [ ! -d "$directory" ]; then

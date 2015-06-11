@@ -2,7 +2,10 @@ node_modules
 dist
 app/assets/bower_components
 public
+env
 *.log
+*.pyc
+*.sqlite
 .tmp
 .publish
 app/assets/styles/main.css

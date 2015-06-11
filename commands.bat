@@ -11,7 +11,8 @@ echo 5: npm install
 echo 6: bower install
 echo 7: virtualenv
 echo 8: pip install
-echo 9: git checkout-index -a --prefix=..\dir\ (export)
+echo 9: manage.py
+echo 10: git checkout-index -a --prefix=..\dir\ (export)
 echo.
 
 set /p command="Choose command number:"
@@ -65,6 +66,14 @@ if /I "%command%" EQU "8" (
   !envname!\Scripts\pip.exe install !requirementssargs! !args!
 )
 if /I "%command%" EQU "9" (
+  set /p envname="Environment name (default: env):"
+  if /I "!envname!" EQU "" (
+    set envname=env
+  )
+  set /p args="Arguments:"
+  !envname!\Scripts\python.exe django/manage.py !args!
+)
+if /I "%command%" EQU "10" (
 set /p directory="Export to directory (end with slash):"
 if not exist "!directory!\." (
   mkdir !directory!

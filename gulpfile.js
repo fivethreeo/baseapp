@@ -1,11 +1,29 @@
 'use strict';
 
 var gulp = require('gulp'),
+  autoprefixer = require('gulp-autoprefixer'),
+  cache = require('gulp-cache'),
+  connect = require('connect'),
+  ejsccompile = require('./ejsc-compile.js'),
+  gh_pages = require('gulp-gh-pages'),
+  glyphiconssvg = require('./glyphicons-svg.js'),
   gulpif = require('gulp-if'),
-  gulpreplace = require('gulp-replace');
-        
-var gutil = require('gulp-util');
-var gh_pages = require('gulp-gh-pages');
+  gulpreplace = require('gulp-replace'),
+  gutil = require('gulp-util'),
+  imagemin = require('gulp-imagemin'),
+  inject = require('gulp-inject'),
+  jshint = require('gulp-jshint'),
+  less = require('gulp-less'),
+  livereload = require('gulp-livereload'),
+  minify = require('gulp-minify-css'),
+  rimraf = require('rimraf'),
+  serveIndex = require('serve-index'),
+  serveStatic = require('serve-static'),
+  spawn = require('win-spawn'),
+  uglify = require('gulp-uglify'),
+  useref = require('gulp-useref'),
+  wiredep = require('wiredep').stream;
+  
 require('gulp-grunt')(gulp); // add all the gruntfile tasks to gulp
 
 // Allows gulp --dev to be run for a more verbose output
@@ -31,9 +49,10 @@ var djangify_dev = gulpif(!isProduction, djangify, gutil.noop()),
   
 var basePaths = {
 	src: 'app/',
-	dest: 'public/',
+	dest: 'build/',
 	tmp: '.tmp/',
-	bower: 'app/assets/bower_components/'
+	bower: 'app/assets/bower_components/',
+	django: 'django/'
 };
 
 var baseAssetPaths = {
@@ -71,7 +90,6 @@ var appFiles = {
 };
 
 gulp.task('clean', function (cb) {
-  var rimraf = require('rimraf')
     
     function ccb(){ return rimraf(basePaths.tmp, cb); }
     
@@ -83,8 +101,6 @@ gulp.task('lint', function () {
     
     if (!lint) return;
     
-    var jshint = require('gulp-jshint');
-
     return gulp.src(appFiles.scripts)
       .pipe(jshint({multistr:true,camelcase:false}))
       .pipe(jshint.reporter('default'));
@@ -92,8 +108,6 @@ gulp.task('lint', function () {
 
 
 gulp.task('images', function () {
-    var cache = require('gulp-cache'),
-        imagemin = require('gulp-imagemin');
 
     return gulp.src(paths.images.src)
         .pipe(cache(imagemin({
@@ -116,8 +130,6 @@ gulp.task('misc', function () {
 });
 
 gulp.task('less', function () {
-    var less = require('gulp-less');
-    var autoprefixer = require('gulp-autoprefixer');
     var lessfiles = gulp.src(paths.styles.src + 'less/*.less')
     
     var less_options = {
@@ -138,7 +150,6 @@ gulp.task('less', function () {
 });
 
 gulp.task('ejsc', function () {
-    var ejsccompile = require('./ejsc-compile.js');
     var ejscfiles = gulp.src(paths.scripts.src + '**/*.ejsc')
  
     return ejscfiles
@@ -159,8 +170,6 @@ gulp.task('copy_js', function () {
 });
 
 gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
-    var wiredep = require('wiredep').stream;
-    var inject = require('gulp-inject');   
      
     var ignorePath = isProduction ? '' : '../app/';
     
@@ -198,12 +207,8 @@ gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
 gulp.task('dohtml', function () {
     
     if (!isProduction) return;
-    
-    var uglify = require('gulp-uglify'),
-        minify = require('gulp-minify-css'),
-        
-        useref = require('gulp-useref'),
-        assets = useref.assets(),
+
+        var assets = useref.assets(),
         
         uglifyIfJs = gulpif('*.js', uglify()),
         minifyIfCss = gulpif('*.css', minify());
@@ -227,9 +232,6 @@ gulp.task('html', ['wiredep'], function () {
 });
 
 gulp.task('connect', function () {
-    var connect = require('connect');
-    var serveStatic = require('serve-static');
-    var serveIndex = require('serve-index');
     
     var serveApp = isProduction ? gutil.noop() : serveStatic(basePaths.src);
     var serveWhich= isProduction ? basePaths.dest : basePaths.tmp;
@@ -247,8 +249,17 @@ gulp.task('connect', function () {
         });
 });
 
-gulp.task('serve', ['connect'], function () {
-    var livereload = require('gulp-livereload');
+gulp.task('connectdjango', function () {
+    
+    return spawn('./env/Scripts/python.exe', [
+      'django/manage.py',
+      'runserver',
+      'localhost:9000',
+      '--insecure'
+    ], {stdio: 'inherit'})
+
+});
+gulp.task('serve', ['connectdjango'], function () {
 
     livereload.listen();
 
@@ -258,12 +269,14 @@ gulp.task('serve', ['connect'], function () {
         basePaths.dest + '*.html',
         paths.styles.dest + '*.css',
         paths.scripts.dest + '**/*.js',
-        paths.images.dest + '**/*'
+        paths.images.dest + '**/*',
+        basePaths.django + '**/*'
       ] : [       
         basePaths.tmp + '*.html',
         paths.styles.tmp + '*.css',
         paths.scripts.tmp + '**/*.js',
-        paths.images.src + '**/*'
+        paths.images.src + '**/*',
+        basePaths.django + '**/*'
     ]
 
     var delay_livereload = function(timeout) {
@@ -300,7 +313,6 @@ gulp.task('deploy', function() {
 });
 
 gulp.task('svg', function() {
-  var glyphiconssvg = require('./glyphicons-svg.js');
   return gulp.src(basePaths.bower + 'bootstrap/dist/fonts/*.svg')
     .pipe(glyphiconssvg())
     .pipe(gulp.dest(paths.images.tmp));

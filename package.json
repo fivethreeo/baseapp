@@ -32,6 +32,7 @@
     "through2": "^0.6.5",
     "vinyl": "^0.4.6",
     "vinyl-file": "^1.1.1",
+    "win-spawn": "^2.0.0",
     "wiredep": "^2.2.2"
   },
   "engines": {
