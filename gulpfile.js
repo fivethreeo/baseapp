@@ -208,10 +208,10 @@ gulp.task('dohtml', function () {
     
     if (!isProduction) return;
 
-        var assets = useref.assets(),
+    var assets = useref.assets(),
         
-        uglifyIfJs = gulpif('*.js', uglify()),
-        minifyIfCss = gulpif('*.css', minify());
+    uglifyIfJs = gulpif('*.js', uglify()),
+    minifyIfCss = gulpif('*.css', minify());
 
     return gulp.src(basePaths.tmp + '*.html')
         .pipe(assets)
@@ -250,8 +250,9 @@ gulp.task('connect', function () {
 });
 
 gulp.task('connectdjango', function () {
-    
-    return spawn('./env/Scripts/python.exe', [
+    var python = /^win/.test(process.platform) ? './env/Scripts/python.exe' :  './env/bin/python';
+     
+    return spawn(python, [
       'django/manage.py',
       'runserver',
       'localhost:9000',
