@@ -2,7 +2,7 @@
 (function($){
   'use strict';
 
-  app.SessionModel = app.BaseModel.extend({
+  app.SessionModel = app.nosyncdecorator(app.BaseModel.extend({
         // Initialize with negative/empty defaults
         // These will be overriden after the initial checkAuth
         defaults: {
@@ -11,8 +11,6 @@
         },
 
         initialize: function(){
-            _.bindAll(this);
-
             // Singleton user object
             // Access or listen on this throughout any module with app.session.user
             this.user = new app.UserModel({});
@@ -20,7 +18,7 @@
 
 
         url: function(){
-            return app.API + '/auth';
+            return app.API + '/user';
         },
 
         // Fxn to update user attributes after recieving API response
@@ -78,7 +76,6 @@
 
                     if( !res.error ){
                         if(_.indexOf(['login', 'signup'], opts.method) !== -1){
-
                             self.updateSessionUser( res.user || {} );
                             self.set({ user_id: res.user.id, logged_in: true });
                         } else {
@@ -115,6 +112,6 @@
             this.postAuth(_.extend(opts, { method: 'remove_account' }), callback);
         }
 
-    });
+    }));
 
 })(jQuery);

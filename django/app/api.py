@@ -41,17 +41,17 @@ class UserResource(ModelResource):
                   format=request.META.get('CONTENT_TYPE', 'application/json'))
                   
                 return self.create_response(request, {
-                    'success': True,
+                    'error': False,
                     'user': user_data
                 })
             else:
                 return self.create_response(request, {
-                    'success': False,
+                    'error': True,
                     'reason': 'disabled',
                     }, HttpForbidden )
         else:
             return self.create_response(request, {
-                'success': False,
+                'error': True,
                 'reason': 'incorrect',
                 }, HttpUnauthorized )
 
@@ -59,6 +59,6 @@ class UserResource(ModelResource):
         self.method_check(request, allowed=['get'])
         if request.user and request.user.is_authenticated():
             logout(request)
-            return self.create_response(request, { 'success': True })
+            return self.create_response(request, { 'error': False })
         else:
-            return self.create_response(request, { 'success': False }, HttpUnauthorized)
+            return self.create_response(request, { 'error': True }, HttpUnauthorized)

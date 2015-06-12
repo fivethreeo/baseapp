@@ -5,7 +5,6 @@
   app.UserModel = app.BaseModel.extend({
 
     initialize: function(){
-        _.bindAll(this);
     },
 
     defaults: {

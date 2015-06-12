@@ -2,6 +2,8 @@
 (function($){
   'use strict';
   
+  app.session = new app.SessionModel();
+  
   app.AppModel = app.BaseRecursiveModel.extend({
     
     defaults: _.extend({}, app.BaseRecursiveModel.prototype.defaults, {
