@@ -34,9 +34,15 @@ class UserResource(ModelResource):
         if user:
             if user.is_active:
                 login(request, user)
+                user_data = self.build_bundle(obj=user, request=request)
+                user_data = self.full_dehydrate(user_data)
+                
+                user_data = self.serialize(request, user_data,
+                  format=request.META.get('CONTENT_TYPE', 'application/json'))
+                  
                 return self.create_response(request, {
                     'success': True,
-                    user: self.full_dehydrate(self.build_bundle(obj=user, request=request))
+                    'user': user_data
                 })
             else:
                 return self.create_response(request, {
