@@ -62,6 +62,11 @@ case "$command" in
     if [ -z "$envname" ]; then
       envname="env"
     fi
+    echo -n "pip install? (y/n default: y):"
+    read useinstall
+    if [ "$useinstall" != "n" ]; then
+      install="install"
+    fi
     echo -n "Use requirements (y/n default: y):"
     read userequirements
     if [ "$userequirements" != "n" ]; then
@@ -74,7 +79,7 @@ case "$command" in
     fi
     echo -n "Arguments:"
     read commandarguments
-    $envname/bin/pip install $requirementssargs $commandarguments
+    $envname/bin/pip install $install $requirementssargs $commandarguments
     ;;
   "9")
     echo -n "Environment name (default: env):"

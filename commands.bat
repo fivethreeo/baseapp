@@ -54,6 +54,9 @@ if /I "%command%" EQU "8" (
   if /I "!envname!" EQU "" (
     set envname=env
   )
+  set /p install="pip install? (y/n default: y):"
+    set install=install
+  )
   set /p userequirements="Use requirements (y/n default: y):"
   if /I "!userequirements!" NEQ "n" (
     set /p requirements="Requirements file (default: requirements.txt):"
@@ -63,7 +66,7 @@ if /I "%command%" EQU "8" (
     set requirementssargs=-r !requirements!
   )
   set /p args="Arguments:"
-  !envname!\Scripts\pip.exe install !requirementssargs! !args!
+  !envname!\Scripts\pip.exe !install! !requirementssargs! !args!
 )
 if /I "%command%" EQU "9" (
   set /p envname="Environment name (default: env):"
