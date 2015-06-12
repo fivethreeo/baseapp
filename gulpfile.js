@@ -175,8 +175,8 @@ gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
     
     var sources = gulp.src([
       paths.scripts.tmp + '*.js',
-      paths.scripts.tmp + 'app/templates/*.js',
-      paths.scripts.tmp + 'app/views/*.js'], {read: false });
+      paths.scripts.tmp + 'app/**/*.js'
+    ], {read: false });
     var sources_options = {relative : true}
 
     var sources_top = gulp.src(basePaths.bower + 'modernizr/modernizr.js', {read: false});

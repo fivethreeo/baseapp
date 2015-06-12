@@ -2,12 +2,49 @@
 (function($){
   'use strict';
   
+  app.getCookie = function(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  };
+  
+  app.addCsrfHeader = function(xhr) {
+    // Set the CSRF Token in the header for security
+    var token = app.getCookie('csrftoken');
+    if (token) xhr.setRequestHeader('X-CSRF-Token', token);
+  };
+  
+  var oldSync = Backbone.sync;
+  Backbone.sync = function(method, model, options) {
+      options.beforeSend = function(xhr){
+        app.addCsrfHeader(xhr);
+      };
+      return oldSync(method, model, options);
+  };
+      
   app.make_attrs = function(dict) {
       return _.map(_.pairs(dict), function(pair) {
         return pair[1] ? pair[0] + '="' + pair[1] + '"' : '';
     }).join(' ');
-  }
-    
+  };
+  
+  app.nosyncdecorator = function(model) {
+    model.prototype.sync = function() { return null; };
+    model.prototype.fetch = function() { return null; };
+    model.prototype.save = function() { return null; }
+    return model
+  };
+        
   app.BaseModel = Backbone.Model.extend({
     
     deepclone: function() {
@@ -35,11 +72,6 @@
       
     }
   });
-        
-  app.BaseModel.prototype.sync = function() { return null; };
-  app.BaseModel.prototype.fetch = function() { return null; };
-  app.BaseModel.prototype.save = function() { return null; }  
-
   app.BaseCollection = Backbone.Collection.extend({
 
 		// We keep the Todos in sequential order, despite being saved by unordered
@@ -73,71 +105,4 @@
       
     }
   });
-    
-  app.AppModel = app.BaseRecursiveModel.extend({
-    
-    defaults: _.extend({}, app.BaseRecursiveModel.prototype.defaults, {
-      enabled: false
-    })
-  });   
-  
-  app.AppCollection = app.BaseRecursiveCollection.extend({
-    model: app.AppModel
-  });
-  
-  app.appcollection = new app.AppCollection();
-  
-  app.ChildView = Backbone.View.extend({
-    
-    template : _.template(templates.app_child_template||''),
-    
-    events : {
-    },
-    
-    initialize : function(){
-    },
-    
-    render : function(){
-
-      this.el = this.template({model: this.model});
-      return this;
-    }
-    
-  });        
-  app.AppView = Backbone.View.extend({
-    
-    el : '.backbone',
-    
-    template : _.template(templates.app_main_template),
-    
-    events : {
-    },
-    
-    initialize : function(){
-      this.render();
-      this.childel = $('#child');
-      this.listenTo(app.appcollection, 'add', this.addOne);
-    },
-    
-    addOne: function (model) {
-      var view = new app.ChildView({ model: model });
-      this.childel.append(view.render().el);
-    },
-
-    render : function(){
-      this.$el.html(this.template({}));
-      return this;
-    },
-    
-  });
-  
-  var AppInstance = new app.AppView();
-  
-  var instance = new app.AppModel();
-  
-  var instance2 = instance.deepclone().set_recursive({});
-   
-  app.appcollection.add(instance);  
-  app.appcollection.add(instance2); 
-  
 })(jQuery);
