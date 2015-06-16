@@ -169,17 +169,16 @@ gulp.task('copy_js', function () {
       .pipe(gulp.dest(paths.scripts.tmp))
 });
 
-gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
+gulp.task('wiredep', [ 'less', 'ejsc', 'bower_require', 'copy_html', 'copy_js'], function () {
      
     var ignorePath = isProduction ? '' : '../app/';
     
     var sources = gulp.src([
-      paths.scripts.tmp + '*.js',
-      paths.scripts.tmp + 'app/**/*.js'
+      paths.scripts.tmp + 'config.js'
     ], {read: false });
     var sources_options = {relative : true}
 
-    var sources_top = gulp.src(basePaths.bower + 'modernizr/modernizr.js', {read: false});
+    var sources_top = gulp.src([basePaths.bower + 'modernizr/modernizr.js', basePaths.bower + 'requirejs/require.js'], {read: false});
     var sources_top_options = {
       relative : true,
       name: 'head',
@@ -196,7 +195,7 @@ gulp.task('wiredep', [ 'less', 'ejsc', 'copy_html', 'copy_js'], function () {
     }
 
     return gulp.src(basePaths.tmp + '*.html')
-        .pipe(wiredep(wiredep_options))
+        //.pipe(wiredep(wiredep_options))
         .pipe(inject(sources_top, sources_top_options))
         .pipe(inject(sources, sources_options))
         .pipe(djangify_dev)
@@ -318,7 +317,22 @@ gulp.task('svg', function() {
     .pipe(glyphiconssvg())
     .pipe(gulp.dest(paths.images.tmp));
 });
-
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
 });
+
+gulp.task('bower_require', [], function () {
+    var bower_require = require('./gulp-bower-requirejs.js');
+    return bower_require({
+        baseUrl: '/static/scripts/',
+        exports: {
+          underscore: '_',
+          backbone: 'Backbone',
+          bootstrap: 'Bootstrap'
+        },
+        require: ['main'],
+        ignore: ['modernizr'],
+        pathReplacements: [[/^app\//, '']]
+      })
+      .pipe(gulp.dest(paths.scripts.tmp));
+});  
