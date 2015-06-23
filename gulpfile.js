@@ -4,9 +4,9 @@ var gulp = require('gulp'),
   autoprefixer = require('gulp-autoprefixer'),
   cache = require('gulp-cache'),
   connect = require('connect'),
-  ejsccompile = require('./ejsc-compile.js'),
+  ejsccompile = require('./node/ejsc-compile.js'),
   gh_pages = require('gulp-gh-pages'),
-  glyphiconssvg = require('./glyphicons-svg.js'),
+  glyphiconssvg = require('./node/glyphicons-svg.js'),
   gulpif = require('gulp-if'),
   gulpreplace = require('gulp-replace'),
   gutil = require('gulp-util'),
@@ -136,7 +136,7 @@ gulp.task('misc', function () {
 
 gulp.task('scripts', function (cb) {
 
-  var requirejs_config = require('./gulp-bower-requirejs-config.js')({
+  var requirejs_config = require('./node/gulp-bower-requirejs-config.js')({
     exports: {
       // underscore: '_',
       // backbone: 'Backbone',
