@@ -13,6 +13,7 @@ var gulp = require('gulp'),
   imagemin = require('gulp-imagemin'),
   inject = require('gulp-inject'),
   jshint = require('gulp-jshint'),
+  _ = require('lodash'),
   less = require('gulp-less'),
   livereload = require('gulp-livereload'),
   minify = require('gulp-minify-css'),
@@ -22,7 +23,11 @@ var gulp = require('gulp'),
   spawn = require('win-spawn'),
   uglify = require('gulp-uglify'),
   useref = require('gulp-useref'),
-  wiredep = require('wiredep').stream;
+  wiredep = require('wiredep').stream,
+  ext = require('gulp-ext'),
+  amdOptimize = require("amd-optimize"),
+  assetManifest = require('gulp-asset-manifest'),
+  concat = require('gulp-concat');
   
 require('gulp-grunt')(gulp); // add all the gruntfile tasks to gulp
 
@@ -129,6 +134,32 @@ gulp.task('misc', function () {
         .pipe(gulp.dest(basePaths.dest));
 });
 
+gulp.task('scripts', function (cb) {
+
+  var requirejs_config = require('./gulp-bower-requirejs-config.js')({
+    exports: {
+      // underscore: '_',
+      // backbone: 'Backbone',
+      bootstrap: 'Bootstrap'
+    },
+    require: ['main'],
+    ignore: ['modernizr'],
+    // pathReplacements: [[/^app\//, '']]
+  });
+  
+  requirejs_config(function(conf) {
+  
+  gulp.src([paths.scripts.src + '**/*.ejsc', paths.scripts.src + '**/*.js'])
+    .pipe(gulpif('*.ejsc', ejsccompile()))
+    .pipe(amdOptimize("main", conf))
+    .pipe(gulpif(isProduction, concat('main.js')))
+    .pipe(assetManifest({bundleName: 'app_scripts', includeRelativePath:true, pathSeparator:'/'}))
+    .pipe(gulp.dest(paths.scripts.tmp))
+    .on('end', function() { cb(); });
+  });
+  
+});
+
 gulp.task('less', function () {
     var lessfiles = gulp.src(paths.styles.src + 'less/*.less')
     
@@ -149,33 +180,19 @@ gulp.task('less', function () {
         .pipe(gulp.dest(paths.styles.tmp));
 });
 
-gulp.task('ejsc', function () {
-    var ejscfiles = gulp.src(paths.scripts.src + '**/*.ejsc')
- 
-    return ejscfiles
-        .pipe(ejsccompile())
-        .pipe(gulp.dest(paths.scripts.tmp));
-});
-
 gulp.task('copy_html', function () {
 
     return gulp.src([basePaths.src + '*.html'])
       .pipe(gulp.dest(basePaths.tmp))
 });
 
-gulp.task('copy_js', function () {
-
-    return gulp.src([paths.scripts.src + '**/*.js'])
-      .pipe(gulp.dest(paths.scripts.tmp))
-});
-
-gulp.task('wiredep', [ 'less', 'ejsc', 'bower_require', 'copy_html', 'copy_js'], function () {
+gulp.task('wiredep', [ 'less', 'scripts', 'copy_html'], function () {
      
     var ignorePath = isProduction ? '' : '../app/';
-    
-    var sources = gulp.src([
-      paths.scripts.tmp + 'config.js'
-    ], {read: false });
+    var manifest = require('./asset_manifest.json');
+    var sources = gulp.src(
+      manifest.app_scripts
+    , {read: false });
     var sources_options = {relative : true}
 
     var sources_top = gulp.src([basePaths.bower + 'modernizr/modernizr.js', basePaths.bower + 'requirejs/require.js'], {read: false});
@@ -317,22 +334,7 @@ gulp.task('svg', function() {
     .pipe(glyphiconssvg())
     .pipe(gulp.dest(paths.images.tmp));
 });
+
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
 });
-
-gulp.task('bower_require', [], function () {
-    var bower_require = require('./gulp-bower-requirejs.js');
-    return bower_require({
-        baseUrl: '/static/scripts/',
-        exports: {
-          underscore: '_',
-          backbone: 'Backbone',
-          bootstrap: 'Bootstrap'
-        },
-        require: ['main'],
-        ignore: ['modernizr'],
-        pathReplacements: [[/^app\//, '']]
-      })
-      .pipe(gulp.dest(paths.scripts.tmp));
-});  

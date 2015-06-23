@@ -1,41 +1,44 @@
-var path           = require('path');
-var through2       = require('through2');
-var gutil          = require('gulp-util');
-var assign         = require('object-assign');
+var path           = require('path'),
+    through2       = require('through2'),
+    gutil          = require('gulp-util'),
+    assign         = require('object-assign'),
+    File = require('vinyl');
 
 var PluginError    = gutil.PluginError;
 
 module.exports = function (opts) {
   // Mixes in default options.
   opts = assign({}, {
-      templates_variable: 'templates',
-      inject_function: null,
-      as_javascript: true
     }, opts);
     
-  var inject_as_javascript = function(basename, name, indent, content) {
-    var templates = templates || {};  
+  var inject_function = function(file, name, indent, content, that) {
     var nl_re = new RegExp('(\\r\\n|\\n|\\r)', 'gm');
     var ap_re = new RegExp("'", 'g');
-          
-    var templates_init = 'var ' + opts.templates_variable + ' = ' + opts.templates_variable + ' || {}; \n'
-    var templates_variable = "templates." + basename + '_' + name + "_template"
-          
-    return templates_init
-      // + '(function() {\n'
-      + templates_variable + " = '"
+    
+    var basename = path.basename(file.path, '.ejsc');  
+    var dirname = path.dirname(file.path); 
+    var templates_variable = dirname.substring(file.base.length, dirname.length).replace(/\\/,'/')
+     + '/' + basename + '_' + name;
+     
+    var templates_init = "define('" + templates_variable + "', function() {";
+    
+    var contents = templates_init
+      + "return '" 
       +  (indent + content)
         .replace(nl_re, "\\" + '\n')
         .replace(ap_re, "\\\'")
-      // + "'\n})();\n"
-      + "';\n"
+      + "';\n});" 
+                    
+    var newfile = new File({
+      base: file.base,
+      path: path.join(dirname, basename + '_' + name + '.js'),
+      contents: new Buffer(contents)
+    });
+
+    // add files to queue
+    that.push(newfile);
   }
       
-  var inject_as_template = function(basename, name, indent, content) {
-    return '<script id="' + basename + '_' + name + '_template" type="text/template">' + indent + content + '</script>'
-  }
-      
-  var inject_function = opts.inject_function || opts.as_javascript ? inject_as_javascript : inject_as_template
     
   var startTag = ['<!-- template:',  ')([^\\s]*?) (', '-->'], endTag = '<!-- endtemplate -->'
     
@@ -56,29 +59,27 @@ module.exports = function (opts) {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
   
-  function inject_templates(file) {
-    var basename = path.basename(file.path, '.ejsc');
+  function inject_templates(file, that) {
     return file.contents.toString('utf8').replace(
       getInjectorTagsRegExp(startTag, endTag),
       function injector (match, starttag1, name, starttag2, indent, content, endtag) {
-        return inject_function(basename, name, indent, content)
+        return inject_function(file, name, indent, content, that)
       }
     );
   }
      
   return through2.obj(function(file, enc, cb) {
     if (file.isNull()) {
-      return cb(null, file);
+      return cb(null, null);
     }
 
     if (file.isStream()) {
       return cb(new PluginError('gulp-ejs-inject', 'Streaming not supported'));
     }
 
-    file.contents = new Buffer(inject_templates(file));
-    file.path = gutil.replaceExtension(file.path, '.js');
+    inject_templates(file, this);
   
-    return cb(null, file);
+    return cb(null, null);
 
   });
 

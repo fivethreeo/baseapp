@@ -9,3 +9,4 @@ env
 .tmp
 .publish
 app/assets/styles/main.css
+asset_manifest.json
