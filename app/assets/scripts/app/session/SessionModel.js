@@ -1,8 +1,11 @@
+define('app/session/SessionModel', [
+  'app',
+  'app/base/BaseModels',
+  'app/auth/UserModel',
+  'jquery'
+], function(app, models, UserModel, $) {
 
-(function($){
-  'use strict';
-
-  app.SessionModel = app.nosyncdecorator(app.BaseModel.extend({
+  var SessionModel = models.BaseModel.extend({
         // Initialize with negative/empty defaults
         // These will be overriden after the initial checkAuth
         defaults: {
@@ -13,12 +16,12 @@
         initialize: function(){
             // Singleton user object
             // Access or listen on this throughout any module with app.session.user
-            this.user = new app.UserModel({});
+            this.user = new UserModel({});
         },
 
 
         url: function(){
-            return app.API + '/user';
+            return app.API + 'user/';
         },
 
         // Fxn to update user attributes after recieving API response
@@ -62,12 +65,12 @@
         postAuth: function(opts, callback, args){
             var self = this;
             var postData = _.omit(opts, 'method');
-            if(DEBUG) console.log(postData);
+            console.log(postData);
             $.ajax({
-                url: this.url() + '/' + opts.method,
+                url: this.url()+ opts.method + '/' ,
                 contentType: 'application/json',
                 dataType: 'json',
-                type: 'POST',
+                type: opts.method == 'logout' ? 'GET': 'POST',
                 beforeSend: function(xhr) {
                   app.addCsrfHeader(xhr);
                 },
@@ -112,6 +115,7 @@
             this.postAuth(_.extend(opts, { method: 'remove_account' }), callback);
         }
 
-    }));
+    });
+  return SessionModel;
 
-})(jQuery);
+});

@@ -8,7 +8,7 @@ from tastypie.resources import ModelResource
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.all()
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['username', 'first_name', 'last_name', 'email']
         allowed_methods = ['get', 'post']
         resource_name = 'user'
 
@@ -34,12 +34,10 @@ class UserResource(ModelResource):
         if user:
             if user.is_active:
                 login(request, user)
-                user_data = self.build_bundle(obj=user, request=request)
-                user_data = self.full_dehydrate(user_data)
-                
-                user_data = self.serialize(request, user_data,
-                  format=request.META.get('CONTENT_TYPE', 'application/json'))
-                  
+                resource = UserResource()
+                bundle = resource.build_bundle(obj=user, request=request)
+                user_data = resource.full_dehydrate(bundle).data
+                print user_data
                 return self.create_response(request, {
                     'error': False,
                     'user': user_data
@@ -48,12 +46,12 @@ class UserResource(ModelResource):
                 return self.create_response(request, {
                     'error': True,
                     'reason': 'disabled',
-                    }, HttpForbidden )
+                    })
         else:
             return self.create_response(request, {
                 'error': True,
                 'reason': 'incorrect',
-                }, HttpUnauthorized )
+                })
 
     def logout(self, request, **kwargs):
         self.method_check(request, allowed=['get'])

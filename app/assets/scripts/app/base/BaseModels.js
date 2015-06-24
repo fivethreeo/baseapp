@@ -1,51 +1,10 @@
-
-(function($){
-  'use strict';
+define('app/base/BaseModels', [
+  'backbone'
+], function(Backbone) {
   
-  app.getCookie = function(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-  };
+  var models = {}
   
-  app.addCsrfHeader = function(xhr) {
-    // Set the CSRF Token in the header for security
-    var token = app.getCookie('csrftoken');
-    if (token) xhr.setRequestHeader('X-CSRF-Token', token);
-  };
-  
-  var oldSync = Backbone.sync;
-  Backbone.sync = function(method, model, options) {
-      options.beforeSend = function(xhr){
-        app.addCsrfHeader(xhr);
-      };
-      return oldSync(method, model, options);
-  };
-      
-  app.make_attrs = function(dict) {
-      return _.map(_.pairs(dict), function(pair) {
-        return pair[1] ? pair[0] + '="' + pair[1] + '"' : '';
-    }).join(' ');
-  };
-  
-  app.nosyncdecorator = function(model) {
-    model.prototype.sync = function() { return null; };
-    model.prototype.fetch = function() { return null; };
-    model.prototype.save = function() { return null; }
-    return model
-  };
-        
-  app.BaseModel = Backbone.Model.extend({
+  models.BaseModel = Backbone.Model.extend({
     
     deepclone: function() {
       var that = this;
@@ -60,7 +19,7 @@
     
   });
     
-  app.BaseRecursiveModel = app.BaseModel.extend({
+  models.BaseRecursiveModel = models.BaseModel.extend({
 
     set_recursive: function(dict) {
       var that = this;
@@ -72,7 +31,7 @@
       
     }
   });
-  app.BaseCollection = Backbone.Collection.extend({
+  models.BaseCollection = Backbone.Collection.extend({
 
 		// We keep the Todos in sequential order, despite being saved by unordered
 		// GUID in the database. This generates the next order number for new items.
@@ -88,7 +47,7 @@
     }
   });
   
-  app.BaseRecursiveCollection = app.BaseCollection.extend({
+  models.BaseRecursiveCollection = models.BaseCollection.extend({
     
     set_recursive: function(list) {
       var that = this;
@@ -105,4 +64,5 @@
       
     }
   });
-})(jQuery);
+  return models;
+});

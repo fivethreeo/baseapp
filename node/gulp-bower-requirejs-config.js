@@ -14,8 +14,8 @@ module.exports = function (opts) {
   opts = assign({
     exports:{},
     ignore:[],
+    ignoreShim:[],
     pathReplacements: [],
-    require:[]
   }, opts);
  
   return function(cb) {
@@ -34,7 +34,7 @@ module.exports = function (opts) {
             shim_temp.exports = exports;
           }
           
-          if (!_.isEmpty(shim_temp)) shim[name] = shim_temp;
+          if (!_.isEmpty(shim_temp) && !_.includes(opts.ignoreShim, name)) shim[name] = shim_temp;
         }
       })
     }
@@ -47,7 +47,6 @@ module.exports = function (opts) {
       _.forEach(opts.ignore, function(ignore_module) {
         delete requireJsConfig.paths[ignore_module]
       })
-      
       _.forOwn(requireJsConfig.paths, function(path, name) {
         _.forEach(opts.pathReplacements, function(replacement) {
           requireJsConfig.paths[name] = requireJsConfig.paths[name].replace(replacement[0], replacement[1])

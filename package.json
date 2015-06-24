@@ -47,5 +47,8 @@
   },
   "engines": {
     "node": ">=0.10.0"
+  },
+  "devDependencies": {
+    "gulp-add": "0.0.2"
   }
 }

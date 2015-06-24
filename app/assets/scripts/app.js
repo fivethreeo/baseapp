@@ -11,7 +11,7 @@ function($, _, Backbone) {
     var app = {
         root : "/",                     // The root path to run the application through.
         URL : "/",                      // Base application URL
-        API : "/api",                   // Base API URL (used by models & collections)
+        API : "/api/v1/",                   // Base API URL (used by models & collections)
 
         // Show alert classes and hide after specified timeout
         showAlert: function(title, text, klass) {
@@ -30,7 +30,50 @@ function($, _, Backbone) {
 
     // Global event aggregator
     app.eventAggregator = _.extend({}, Backbone.Events);
-
+  
+    app.getCookie = function(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie != '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    };
+    
+    app.addCsrfHeader = function(xhr) {
+      // Set the CSRF Token in the header for security
+      var token = app.getCookie('csrftoken');
+      if (token) xhr.setRequestHeader('X-CSRF-Token', token);
+    };
+    
+    var oldSync = Backbone.sync;
+    Backbone.sync = function(method, model, options) {
+        options.beforeSend = function(xhr){
+          app.addCsrfHeader(xhr);
+        };
+        return oldSync(method, model, options);
+    };
+        
+    app.make_attrs = function(dict) {
+        return _.map(_.pairs(dict), function(pair) {
+          return pair[1] ? pair[0] + '="' + pair[1] + '"' : '';
+      }).join(' ');
+    };
+    
+    app.nosyncdecorator = function(model) {
+      model.prototype.sync = function() { return null; };
+      model.prototype.fetch = function() { return null; };
+      model.prototype.save = function() { return null; }
+      return model
+    };
+    
     // View.close() event for garbage collection
     Backbone.View.prototype.close = function() {
         this.remove();

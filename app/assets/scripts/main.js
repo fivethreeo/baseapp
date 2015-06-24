@@ -5,8 +5,7 @@
 require([
     "app",
     "router",
-    "app/templates/app_main",
-    "app/templates/app_child",
+    'app/session/SessionModel'
 ],
 function(app, WebRouter, SessionModel) {
 
@@ -17,7 +16,7 @@ function(app, WebRouter, SessionModel) {
 
     // Create a new session model and scope it to the app global
     // This will be a singleton, which other modules can access
-    // app.session = new SessionModel({});
+    app.session = new SessionModel({});
 
     // Check the auth status upon initialization,
     // before rendering anything or matching routes

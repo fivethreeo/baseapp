@@ -1,8 +1,10 @@
 
-(function($){
-  'use strict';
+define('app/auth/UserModel', [
+  'app',
+  'app/base/BaseModels'
+], function(app, models) {
 
-  app.UserModel = app.BaseModel.extend({
+  var UserModel = models.BaseModel.extend({
 
     initialize: function(){
     },
@@ -19,5 +21,7 @@
     }
 
   });
+  
+  return UserModel;
 
-})(jQuery);
+});

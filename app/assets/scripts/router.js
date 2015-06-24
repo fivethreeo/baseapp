@@ -4,18 +4,16 @@
 
 define([
     "app",
-
-//    "models/SessionModel",
-//    "models/UserModel",
-
-//    "views/HeaderView",
-//    "views/LoginPageView"
+    "app/session/SessionModel",
+    "app/auth/UserModel",
+    "app/views/HeaderView",
+    "app/views/LoginPageView"
 ], function(app, SessionModel, UserModel, HeaderView, LoginPageView){
 
     var WebRouter = Backbone.Router.extend({
 
         initialize: function(){
-            _.bindAll(this);
+           _.bindAll(this, 'show', 'index');
         },
 
         routes: {

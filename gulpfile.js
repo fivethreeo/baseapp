@@ -140,21 +140,22 @@ gulp.task('scripts', function (cb) {
     exports: {
       // underscore: '_',
       // backbone: 'Backbone',
-      bootstrap: 'Bootstrap'
+      // bootstrap: 'Bootstrap'
     },
     require: ['main'],
     ignore: ['modernizr'],
+    ignoreShim: ['underscore', 'backbone', 'bootstrap'],
     // pathReplacements: [[/^app\//, '']]
   });
   
   requirejs_config(function(conf) {
-  
+  console.log(conf);
   gulp.src([paths.scripts.src + '**/*.ejsc', paths.scripts.src + '**/*.js'])
     .pipe(gulpif('*.ejsc', ejsccompile()))
     .pipe(amdOptimize("main", conf))
     .pipe(gulpif(isProduction, concat('main.js')))
-    .pipe(assetManifest({bundleName: 'app_scripts', includeRelativePath:true, pathSeparator:'/'}))
     .pipe(gulp.dest(paths.scripts.tmp))
+    .pipe(assetManifest({bundleName: 'app_scripts', includeRelativePath:true, pathSeparator:'/'}))
     .on('end', function() { cb(); });
   });
   
@@ -190,8 +191,9 @@ gulp.task('wiredep', [ 'less', 'scripts', 'copy_html'], function () {
      
     var ignorePath = isProduction ? '' : '../app/';
     var manifest = require('./asset_manifest.json');
+
     var sources = gulp.src(
-      manifest.app_scripts
+      _.map(manifest.app_scripts, function (f){ console.log(f);return './' + f; })
     , {read: false });
     var sources_options = {relative : true}
 
