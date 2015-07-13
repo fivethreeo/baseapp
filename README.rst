@@ -48,6 +48,11 @@ Run project in production: ::
 
   gulp serve
 
+Notes
+=====
+
+Signup not implemented.
+
 .. _nodejs: https://nodejs.org/
 .. _io.js: https://iojs.org/
 .. _Python: https://www.python.org/downloads/release/python-2710/
