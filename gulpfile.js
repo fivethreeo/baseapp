@@ -144,7 +144,7 @@ gulp.task('scripts', function (cb) {
     },
     require: ['main'],
     ignore: ['modernizr'],
-    ignoreShim: ['underscore', 'backbone', 'bootstrap'],
+    ignoreShim: ['underscore', 'backbone', 'bootstrap', 'parsleyjs'],
     // pathReplacements: [[/^app\//, '']]
   });
   
