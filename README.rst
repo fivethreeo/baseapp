@@ -3,9 +3,9 @@
 Installation
 ============
 
-Install ``nodejs`` or ``io.js``.
+Install `nodejs`_ or `io.js`_.
 
-Install ``Python``.
+Install `Python`_.
 
 Install virtualenv: ::
   
