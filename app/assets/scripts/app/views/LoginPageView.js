@@ -3,7 +3,7 @@ define([
     "app/templates/app_logged_in",
     "app/templates/app_login",
     "parsleyjs"
-], function(app, LoggedInPageTpl, LoginPageTpl){
+], function(app, LoggedInPageTpl, LoginPageTpl, $){
 
     var LoginView = Backbone.View.extend({
 
@@ -50,7 +50,7 @@ define([
         onLoginAttempt: function(evt){
             if(evt) evt.preventDefault();
 
-            if(this.$("#login-form").parsley('validate')){
+            if(this.$("#login-form").parsley().validate()){
                 app.session.login({
                     username: this.$("#login-username-input").val(),
                     password: this.$("#login-password-input").val()
@@ -74,7 +74,7 @@ define([
 
         onSignupAttempt: function(evt){
             if(evt) evt.preventDefault();
-            if(this.$("#signup-form").parsley('validate')){
+            if(this.$("#signup-form").parsley().validate()){
                 app.session.signup({
                     username: this.$("#signup-username-input").val(),
                     password: this.$("#signup-password-input").val(),

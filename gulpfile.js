@@ -193,7 +193,7 @@ gulp.task('wiredep', [ 'less', 'scripts', 'copy_html'], function () {
     var manifest = require('./asset_manifest.json');
 
     var sources = gulp.src(
-      _.map(manifest.app_scripts, function (f){ console.log(f);return './' + f; })
+      manifest.app_scripts
     , {read: false });
     var sources_options = {relative : true}
 

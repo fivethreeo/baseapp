@@ -9,10 +9,10 @@
             <% if(logged_in){ %>
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"><%= user.username %> <b class="caret"></b></a>
+                    <a class="dropdown-toggle" data-parsley-toggle="dropdown" href="#"><%= user.username %> <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li><a id="logout-link" href="#" data-bypass>Sign Out</a></li>
-                        <li><a id="remove-account-link" href="#" data-bypass>Remove Account</a></li>
+                        <li><a id="logout-link" href="#" data-parsley-bypass>Sign Out</a></li>
+                        <li><a id="remove-account-link" href="#" data-parsley-bypass>Remove Account</a></li>
                     </ul>
                 </li>
             </ul>
@@ -40,23 +40,23 @@
                 <ul id="login-errors" class="parsley-error-list"></ul>
             </div>
 
-            <form id="login-form" class="form" data-validate="parsley">
+            <form id="login-form" class="form" data-parsley-validate="parsley">
                 <fieldset>
                     <div class="control-group">
                         <div class="controls">
                             <input type="text" id="login-username-input" name="username" placeholder="Username" value="<%= user.username || '' %>"
-                                data-required="true" data-notblank="true">
+                                data-parsley-required="true" data-parsley-notblank="true">
                             <span class="help-block"></span>
                         </div>
                     </div>
                     <div class="control-group mb20">
                         <div class="controls">
                             <input class="input-medium" type="password" id="login-password-input" placeholder="Password" name="user_password" 
-                                value="" data-required="true" data-notblank="true" data-rangelength="[5,25]">
+                                value="" data-parsley-required="true" data-parsley-notblank="true" data-parsley-rangelength="[5,25]">
                             <span class="help-block"></span>
                         </div>
                     </div>
-                    <a href="#" id="login-btn" class="btn btn-primary btn-lg" data-bypass>Login</a>
+                    <a href="#" id="login-btn" class="btn btn-primary btn-lg" data-parsley-bypass>Login</a>
 
                 </fieldset>
             </form>
@@ -69,30 +69,30 @@
             <div class="height:50px;">
                 <ul id="signup-errors" class="parsley-error-list"></ul>
             </div>
-            <form id="signup-form" class="form" data-validate="parsley">
+            <form id="signup-form" class="form" data-parsley-validate>
                 <fieldset>
                     <div class="control-group">
                         <div class="controls">
                             <input type="text" id="signup-username-input" name="username" placeholder="Username" value="<%= user.username || '' %>"
-                                data-required="true" data-notblank="true">
+                                data-parsley-notblank="true" required>
                             <span class="help-block"></span>
                         </div>
                     </div>
                     <div class="control-group">
                         <div class="controls">
                             <input class="input-medium" type="password" id="signup-password-input" placeholder="Password" name="user_password" 
-                                value="" data-required="true" data-notblank="true" data-rangelength="[5,25]">
+                                value="" data-parsley-required="true" data-parsley-notblank="true" data-parsley-rangelength="[5,25]">
                             <span class="help-block"></span>
                         </div>
                     </div>
                     <div class="control-group mb20">
                         <div class="controls">
                             <input class="input-medium" type="password" id="signup-password-confirm-input" placeholder="Confirm Password" name="user_password" 
-                                value="" data-required="true" data-notblank="true" data-rangelength="[5,25]" data-equalto="#signup-password-input">
+                                value="" data-parsley-required="true" data-parsley-notblank="true" data-parsley-rangelength="[5,25]" data-parsley-equalto="#signup-password-input">
                             <span class="help-block"></span>
                         </div>
                     </div>
-                    <a href="#" id="signup-btn" class="btn btn-primary btn-lg" data-bypass>Signup</a>
+                    <a href="#" id="signup-btn" class="btn btn-primary btn-lg" data-parsley-bypass>Signup</a>
                     
                 </fieldset>
             </form>
