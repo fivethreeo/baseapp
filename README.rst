@@ -47,6 +47,21 @@ Build project in production: ::
 Run project in production: ::
 
   gulp serve
+  
+Pasteable commands: ::
+
+  npm install
+  npm install -g bower
+  bower install
+
+  pip install virtualenv
+
+  virtualenv env
+  env/bin/pip install -r requirements.txt
+  env/bin/python django/manage.py syncdb
+
+  gulp build --dev
+  gulp serve --dev  
 
 Notes
 =====
